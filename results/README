@@ -1,0 +1,13 @@
+This directory contains results from running the C++ implementation of
+the benchmark analytics at a rate slow enough to induce no dropped
+packets.  These results are thus the "correct" answers for a
+benchmark, and can be used to judge the accuracy of other versions of
+the anayltic or other runs where packets may be dropped.
+
+Each file has a name of the form analytic.benchN.P.
+
+N = the number of the benchmark, e.g. 1,2,3
+P = the number of packets generated and processed, e.g. 10K or 1M
+
+The file content is what the C++ analytic writes to the screen as
+it processes the packets and summarizes the results.

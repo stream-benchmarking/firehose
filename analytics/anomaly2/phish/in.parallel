@@ -1,0 +1,22 @@
+# PHISH script for parallel launch of anomaly detection
+
+set safe 10000
+set memory 2 
+
+variable p 1
+variable f NULL
+
+variable u 1
+variable k 1
+variable a 1
+
+minnow 1 udp -p $p 55555
+minnow 2 keyhash -b 50
+minnow 3 anomaly2 -f $f
+
+hook 1 roundrobin 2
+hook 2 direct 3
+
+school 1 $u
+school 2 $k
+school 3 $a

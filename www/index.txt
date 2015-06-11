@@ -1,0 +1,54 @@
+<HEAD>
+    <TITLE> FireHose Streaming Benchmarks </TITLE>
+    <meta name="Description" content="FireHose Streaming Benchmarks home page">
+    <meta name="keywords" content="FireHose, streaming data analysis">
+    <meta name="filename" content="index.html" />
+    <meta name="subject" content="FireHose Streaming Benchmarks home page" />
+    <link rev="owns" title="Steve Plimpton" href="mailto:sjplimp@sandia.gov" />
+    <link rev="made, publisher" title="Steve Plimpton" href="mailto:sjplimp@sandia.gov" />
+    <meta name="Author" content="Steve Plimpton" />
+</HEAD>
+
+FireHose Streaming Benchmarks :c,h3
+
+<center>
+:c,image(images/firehose.jpg)
+</center>
+
+:line
+
+These web pages describe a collection of open-source stream processing
+benchmarks we have defined, called FireHose.  We are inviting users
+and authors of various stream-processing frameworks to implement and
+experiment with the benchmarks in order to refine/expand their
+definitions and collect performance results.  After this initial
+phase, we plan to create a new FireHose web site, which will include
+the definition of the benchmarks, sample software implementations, and
+performance results.  We hope the benchmarks and the WWW site will
+stimulate further discussion and interactions within the streaming
+community.
+
+The sponsors of the FireHose benchmarks are Karl Anderson (DoD) and
+"Steve Plimpton"_http://www.sandia.gov/~sjplimp (Sandia National
+Labs).
+
+"Download"_dnl
+"Documentation"_doc/README.html
+"Benchmark Results"_bench.html
+"Publications"_papers.html
+"Contribute"_contribute.html
+"Open source"_open_source.html
+"Authors"_authors.html :ul
+
+:line
+
+The FireHose WWW site is hosted by Sandia, which has this "Privacy and
+Security statement"_security.
+
+:link(security,http://www.sandia.gov/general/privacy-security/index.html)
+
+:link(snl,http://www.sandia.gov)
+:link(doe,http://www.doe.gov)
+:link(bsd,http://en.wikipedia.org/wiki/BSD_license)
+:link(sjp,http://www.sandia.gov/~sjplimp)
+:link(dnl,http://github.com/stream-benchmarking/firehose)

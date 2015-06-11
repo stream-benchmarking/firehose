@@ -1,0 +1,213 @@
+<HTML>
+<CENTER><A HREF = "run.html">Previous Section</A> - <A HREF = "README.html">FireHose WWW Site</A> - <A HREF = "README.html">Next Section</A> 
+</CENTER>
+
+
+<H3>Results 
+</H3>
+<P>There are FireHose benchmark results for the currently defined
+benchmarks:
+</P>
+<OL><LI><A HREF = "#anomaly1">anomaly #1</A> = anomaly detection in a fixed key range
+<LI><A HREF = "#anomaly2">anomaly #2</A> = anomaly detection in an unbounded key range
+<LI><A HREF = "#anomaly3">anomaly #3</A> = anomaly detection in a two-level key space 
+</OL>
+<P>They were run as described in the <A HREF = "run.html">Running the benchmarks</A>
+section, on these <A HREF = "#machines">Machines</A>.
+</P>
+<P>For each benchmark a table is shown below with the following columns
+of information:
+</P>
+<UL><LI>Version = which version of the analytic was run
+<LI>Machine = what machine the benchmark was run on 
+<LI>Ngen = # of generators used
+<LI>Ndata = # of datums generated
+<LI>Grate = aggregate stream rate for all generators, in datums/sec
+<LI>Cores = # of cores the analytic was run on
+<LI>Packets = percentage of packets or datums processed, 100.0 = no drops
+<LI>Events = total events for the analytic to detect
+<LI>Score = score for the analytic calculation, 0 = perfect (see discussion below)
+<LI>Instant = no/yes for whether the analytic produces its answers instantly when a datum triggers a result, or whether there is some delay in the algorithm it uses
+<LI>LOC = lines-of-code required to implement the analytic
+<LI>Comments = footnotes to additional comments 
+</UL>
+<P>Some implementations of the analytic will have multiple entries,
+e.g. if they were run on different machines, at different stream
+rates, or in parallel on different numbers of processors.
+</P>
+<P>The "Packets" entry is the percentage of emitted packets that were
+received and processed by the analytic.  Thus a value of 99.99% means
+that 1 in 10,000 packets was dropped.  Ditto for datums since each
+packet contains a fixed number of datums.
+</P>
+<P>The "Events" entry is a count of possible "events" within the stream
+for the analytic to find.  Note that this is a function of how much
+data is generated during the benchmark run.  Since each run is for the
+same length of time, runs at a faster stream rate will generate more
+datums and have a higher event count.  Each benchmark defines what it
+counts as an "event".
+</P>
+<P>For the "Score" entry, the value is meant to measure deviations from
+the correct result, either due to dropped packets, or invalid
+computations by the analytic.  A low score is good and a high score is
+bad.
+</P>
+<P>The score is computed by comparing the results from the benchmark run
+in the table to results from a run by the C++ reference implementation
+which is run so that it sees the identical stream from the
+generator(s) at a rate slow enough to insure no packets are dropped.
+The latter is considered the correct result.
+</P>
+<P>Each benchmark defines how it computes a score, as discussed below.
+Typically one point is assigned for missed or mistaken events, so the
+maximum score is roughly that of the event count.  But it's possible
+for the score to exceed the event count, e.g. finding no actual events
+and many incorrect events.
+</P>
+<P>If the benchmark run completed with no dropped packets, it should
+receive a score of 0 if the analytic performed its computations
+correctly.  The score will typically increase as more and more packets
+are dropped.  How sensitive the score is to dropped packets depends on
+the benchmark.
+</P>
+<P>There are at least 2 reasons why a no-drop run could result in a small
+non-zero score.  First, when multiple generators are used, packets
+arrive at the analytic in an indeterminate order.  This can alter the
+events detected by the analytic.  Second, for benchmarks which use
+expiring hash tables to track keys, there can be small differences
+between the keys the generator keeps in its active set (and thus may
+emit) versus keys the analytic deems to be active.  If the generator
+emits a key the analytic has already discarded, this can lead to a
+difference in a event counts (versus what the generator counts as
+events).  Ditto if comparing two runs where the order of packets may
+vary between them due to using multiple generators.  If the guidelines
+discussed in the <A HREF = "analytics.html">Analytics</A> section are followed for
+expiring hash tables, these differences should be minimal.
+</P>
+<P>The "LOC" is a lines-of-code count for the files in the analytics
+sub-directories, including comments and blank lines.  For frameworks
+like PHISH, only lines in scripts or code added to the framework to
+run the benchmark are counted; lines in the framework code itself are
+not included.
+</P>
+<P>In all the cases currently listed in the tables below, we attempted to
+run the benchmarks at the maximum stream rate a particular version of
+the analytic could process the stream and still maintain a (nearly)
+zero drop rate.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "anomaly1"></A>(1) Benchmark #1 - anomaly detection in a fixed key range 
+</H4>
+<P>This benchmark is discussed <A HREF = "run.html#bench1">here</A> and uses the
+<A HREF = "generators.html#bias">biased-powerlaw generator</A> and
+<A HREF = "analytic.html#anomaly1">anomaly1</A> analytic.
+</P>
+<P>The table lists results for runs of 5 minutes.  A "K" in the table
+means thousand, an "M" means million, a "B" means billion.
+</P>
+<DIV ALIGN=center><TABLE  BORDER=5 >
+<TR ALIGN="center"><TD  ALIGN ="left">Version </TD><TD > Machine </TD><TD > NGen </TD><TD > Ndata </TD><TD > Grate </TD><TD > Cores </TD><TD > Packets </TD><TD > Events </TD><TD > Score </TD><TD > Instant </TD><TD > LOC </TD><TD > Comments</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">C++ </TD><TD > Dell </TD><TD > 2 </TD><TD > 1.54 B </TD><TD > 5.6 M/sec </TD><TD > 1 </TD><TD > 100% </TD><TD > 119 K </TD><TD > 0 </TD><TD > yes </TD><TD > 275 </TD><TD > none</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">Python </TD><TD > Dell </TD><TD > 1 </TD><TD > 135 M </TD><TD > 450 K/sec </TD><TD > 1 </TD><TD > 100% </TD><TD > 18.7 K </TD><TD > 0 </TD><TD > yes </TD><TD > 190 </TD><TD > none</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">PHISH/C++ 1/0/1 </TD><TD > Dell </TD><TD > 2 </TD><TD > 1.55 B </TD><TD > 5.5 M/sec </TD><TD > 2 </TD><TD > 100% </TD><TD > 120 K </TD><TD > 0 </TD><TD > yes </TD><TD > 520 </TD><TD > (a)</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">PHISH/C++ 1/4/2 </TD><TD > Dell </TD><TD > 4 </TD><TD > 3.00 B </TD><TD > 10.0 M/sec </TD><TD > 7 </TD><TD > 100% </TD><TD > 230 K </TD><TD > 0 </TD><TD > yes </TD><TD > 525 </TD><TD > (b)</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">
+</TD></TR></TABLE></DIV>
+
+<P>The event entry is the sum of true anomalies, false positives, false
+negatives, and true negatives found in the correct result.
+</P>
+<P>One score point is tallied for each key in each true anomaly, false
+positive, or false negative output of the correct result but which is
+not in the benchmark result.  Likewise one point is tallied for keys
+in those 3 categories in the benchmark result but which are not in the
+correct result.  Individual keys which true negatives are not included
+in the results (there are a lot of them), but the total key counts
+are.  The absolute value of the difference between the true negative
+totals in the 2 runs is also added to the score.
+</P>
+<P>Comments:
+</P>
+<P>(a) A 2-process PHISH run on top of MPI, using the in.anomaly
+script.  One process reads packets, the other performs the anomaly
+detection.  PHISH runs as a distributed-memory parallel program.
+</P>
+<P>(b) A 7-process PHISH run on top of MPI, using the in.parallel script.
+One minnow (process) reads packets, 4 minnows re-bundle them by
+hashing the keys, and 2 minnows perform the analytic computation, each
+on a subset of the key space.  PHISH runs as a distributed-memory
+parallel program.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "anomaly2"></A>(2) Benchmark #2 - anomaly detection in an unbounded key range 
+</H4>
+<P>This benchmark is discussed <A HREF = "run.html#bench2">here</A> and uses the
+<A HREF = "generators.html#active">active set generator</A> and
+<A HREF = "analytic.html#anomaly2">anomaly2</A> analytic.
+</P>
+<P>The table lists results for runs of 30 minutes.  A "K" in the table
+means thousand, an "M" means million, a "B" means billion.
+</P>
+<DIV ALIGN=center><TABLE  BORDER=5 >
+<TR ALIGN="center"><TD  ALIGN ="left">Version </TD><TD > Machine </TD><TD > NGen </TD><TD > Ndata </TD><TD > Grate </TD><TD > Cores </TD><TD > Packets </TD><TD > Events </TD><TD > Score </TD><TD > Instant </TD><TD > LOC </TD><TD > Comments</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">C++ </TD><TD > Dell </TD><TD > 1 </TD><TD > 3.42 B </TD><TD > 1.9 M/sec </TD><TD > 1 </TD><TD > 100% </TD><TD > 3.73 M </TD><TD > 0 </TD><TD > yes </TD><TD > 415 </TD><TD > none</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">Python </TD><TD > Dell </TD><TD > 1 </TD><TD > 252 M </TD><TD > 140 K/sec </TD><TD > 1 </TD><TD > 100% </TD><TD > 432 K </TD><TD > 0 </TD><TD > yes </TD><TD > 290 </TD><TD > none</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">PHISH/C++ 1/0/1 </TD><TD > Dell </TD><TD > 1 </TD><TD > 3.42 B </TD><TD > 1.9 M/sec </TD><TD > 2 </TD><TD > 100% </TD><TD > 3.74 M </TD><TD > 0 </TD><TD > yes </TD><TD > 660 </TD><TD > (a)</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">PHISH/C++ 1/4/2 </TD><TD > Dell </TD><TD > 2 </TD><TD > 6.12 B </TD><TD > 3.4 M/sec </TD><TD > 7 </TD><TD > 100% </TD><TD > 6.80 M </TD><TD > 10 </TD><TD > yes </TD><TD > 665 </TD><TD > (b)</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">
+</TD></TR></TABLE></DIV>
+
+<P>The event and score entries are computed in the same manner as for
+benchmark #1.
+</P>
+<P>(a) See the (a) comment for benchmark #1.
+</P>
+<P>(b) See the (b) comment for benchmark #1.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "anomaly3"></A>(3) Benchmark #3 - anomaly detection in a two-level key space 
+</H4>
+<P>This benchmark is discussed <A HREF = "run.html#bench3">here</A> and uses the
+<A HREF = "generators.html#twolevel">two-level generator</A> and
+<A HREF = "analytic.html#anomaly3">anomaly3</A> analytic.
+</P>
+<P>The table lists results for runs of 30 minutes.  A "K" in the table
+means thousand, an "M" means million, a "B" means billion.
+</P>
+<DIV ALIGN=center><TABLE  BORDER=5 >
+<TR ALIGN="center"><TD  ALIGN ="left">Version </TD><TD > Machine </TD><TD > NGen </TD><TD > Ndata </TD><TD > Grate </TD><TD > Cores </TD><TD > Packets </TD><TD > Events </TD><TD > Score </TD><TD > Instant </TD><TD > LOC </TD><TD > Comments</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">C++ </TD><TD > Dell </TD><TD > 1 </TD><TD > 2.70 B </TD><TD > 1.5 M/sec </TD><TD > 1 </TD><TD > 100% </TD><TD > 1.12 M </TD><TD > 0 </TD><TD > yes </TD><TD > 495 </TD><TD > none</TD></TR>
+<TR ALIGN="center"><TD  ALIGN ="left">
+</TD></TR></TABLE></DIV>
+
+<P>The event and score entries are computed in the same manner as for
+benchmark #1.
+</P>
+<P>The events detected by this benchmark, and thus the score, are quite
+sensitive to dropped packets, since a missed packet means an instance
+of an "inner" key cannot be constructed, even if other packets
+contributing to that key are received.  Thus a low drop rate can still
+induce a poor score.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "machines"></A>Machines 
+</H4>
+<P>These are the machines listed in the tables above:
+</P>
+<P>Dell = desktop machine running RedHat Linux, with dual hex-core 3.47
+GHz Intel Xeon (X5690) CPUs.  The generator(s) and the analytic were
+both run together on the same box.
+</P>
+</HTML>

@@ -1,0 +1,31 @@
+"FireHose WWW Site"_pws :c
+:link(pws,index.html)
+
+:line
+
+FireHose Authors :h3
+
+The authors of the FireHose suite are Karl Anderson (keander at sandia.gov) and "Steve Plimpton"_sjp (sjplimp at sandia.gov).
+
+:link(sjp,http://www.sandia.gov/~sjplimp)
+
+You can send us email regarding any of these issues:
+
+If you use FireHose for something interesting, we'd like to hear about
+it. :ulb,l
+
+If you encounter a bug or have a question about using the software,
+send us an email. :l
+
+If you write a paper using the FireHose suite, we can post a citation
+to it on "this page"_papers.html. :l
+
+If you write a new analytic or generator that others 
+would be interested in, we can include it in the
+distribution hosted on "GitHub"_fhgh.  :l
+
+If you have new benchmarking results that others 
+would be interested in, we can include it in the
+distribution hosted on "GitHub"_fhgh.  :l,ule
+
+:link(fhgh,http://github.com/stream-benchmarking/firehose)

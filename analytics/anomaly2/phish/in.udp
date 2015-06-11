@@ -1,0 +1,13 @@
+# PHISH script for test of reading from UDP port
+
+set memory 2
+variable p 1
+
+minnow 1 udp -p $p 55555
+minnow 2 print
+#minnow 2 print -f tmp
+
+hook 1 single 2
+
+school 1 1
+school 2 1

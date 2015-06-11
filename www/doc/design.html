@@ -1,0 +1,42 @@
+<HTML>
+<CENTER><A HREF = "motivate.html">Previous Section</A> - <A HREF = "README.html">FireHose WWW Site</A> - <A HREF = "generators.html">Next Section</A> 
+</CENTER>
+
+
+<H3>Benchmark design 
+</H3>
+<P>Each of the benchmarks in the FireHose suite has two parts: a
+<I>front-end generator</I> that writes a stream of events (datums) to one
+or more UDP sockets in a text-based format, and a <I>back-end analytic</I>
+that reads the stream and processes the datums.
+</P>
+<P>The <A HREF = "generators.html">generators</A> create a stream of datums with the
+following attributes:
+</P>
+<UL><LI>reproducible
+<LI>scalable rate, up to tens of millions of datums/sec
+<LI>serial or parallel generation 
+</UL>
+<P>The computations performed by the <A HREF = "analytics.html">analytics</A> have the
+following attributes:
+</P>
+<UL><LI>well-defined and relatively easy to implement
+<LI>allow for use of more sophisticated data structures and algorithms
+<LI>scoring metrics for the processing rate and accuracy of the result
+<LI>allow for serial or parallel implementation (shared or distributed memory) 
+</UL>
+<P>The FireHose tarball provides code for each generator.  They are meant
+to be used as-is, without modification.  The tarball also provides
+sample implementations of the analytics, but users are free to
+re-implement them in a manner optimized for their streaming framework
+or their machine, or with better algorithms, so long as they follow
+the rules of the benchmark and measure the relevant scoring metrics.
+</P>
+<P>UDP sockets are used as the link between the generator and analytic,
+so that the generator is not throttled by the analytic, just as in
+stream processing scenarios where data must be processed as it appears
+in real-time.  The UDP protocol means the analytic will drop datums if
+it cannot keep up with the generated stream, which is one of the
+effects we wish to measure.
+</P>
+</HTML>

@@ -1,0 +1,10 @@
+This directory contains code for several stream analytics, as discussed
+in doc/analytics.html.
+
+anomaly1 = anomaly detection in a fixed key range
+anomaly2 = anomaly detection in an unbounded key range
+anomaly3 = anomaly detection in a two-level key space
+
+Each directory contains several implementations of the analytic
+including single-file serial codes, implementations for different
+streaming frameworks, and implementations in different languages.

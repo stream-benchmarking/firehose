@@ -1,0 +1,27 @@
+"FireHose WWW Site"_pws :c
+:link(pws,index.html)
+
+:line
+
+Contributing to the FireHose suite :h3
+
+In the spirit of an open-source code, there are various ways you can
+contribute to making the FireHose suite better.  You can send email to
+any of these items to the developers listed on the "FireHose WWW
+site"_pws.
+
+Point prospective users to the FireHose WWW site.  Mention it in talks
+or link to it from your own WWW site. :ulb,l
+
+If you find an error or omission in the FireHose documentation, or have a
+suggestion for something to clarify or include, let us know. :l
+
+If you find a bug, please submit an issue on "GitHub"_fhgh with details of how
+to reproduce it. :l
+
+:link(fhgh,http://github.com/stream-benchmarking/firehose)
+
+If you publish a paper using FireHose, send the citation to us and we can
+add it to the Publications page. :l
+
+Contribute a new analytic or generator to be added to the suite. :ule,l

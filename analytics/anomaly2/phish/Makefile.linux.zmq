@@ -1,0 +1,32 @@
+# linux.zmq = RedHat Linux box, g++4, PHISH ZMQ lib
+
+SHELL = /bin/sh
+
+# ---------------------------------------------------------------------
+# compiler/linker settings
+# specify flags and libraries needed for your compiler
+
+CC =		g++
+CCFLAGS =	-g -O -I/home/sjplimp/phish/src
+LINK =		g++
+LINKFLAGS =	-g -O 
+#LIB =		../src/libphish-zmq.so
+LIB =		/home/sjplimp/phish/src/libphish-zmq.so
+LIB_RPATH =     -Wl,-rpath,/home/sjplimp/phish/src
+
+# ---------------------------------------------------------------------
+# build rules and dependencies
+# no need to edit this section
+
+OBJ = $(EXE).o
+
+$(EXE): $(OBJ)
+	$(LINK) $(LINKFLAGS) $(OBJ) $(LIB) -o $(EXE) $(LIB_RPATH)
+
+# Rules
+
+%.o:%.cpp
+	$(CC) $(CCFLAGS) -c $<
+
+%.o:%.c
+	$(CC) $(CCFLAGS) -c $<

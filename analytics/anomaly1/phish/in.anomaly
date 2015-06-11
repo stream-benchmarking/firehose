@@ -1,0 +1,15 @@
+# PHISH script for 2-minnow launch of anomaly detection
+
+# needed for Python
+#set safe 10000
+
+variable p 1
+variable f NULL
+
+minnow 1 udp -p $p 55555
+minnow 2 anomaly1 -f $f
+
+hook 1 single 2
+
+school 1 1
+school 2 1

@@ -1,0 +1,39 @@
+"Previous Section"_motivate.html - "FireHose WWW Site"_fws - "Next Section"_generators.html :c
+
+:link(fws,README.html)
+
+Benchmark design :h3
+
+Each of the benchmarks in the FireHose suite has two parts: a
+{front-end generator} that writes a stream of events (datums) to one
+or more UDP sockets in a text-based format, and a {back-end analytic}
+that reads the stream and processes the datums.
+
+The "generators"_generators.html create a stream of datums with the
+following attributes:
+
+reproducible
+scalable rate, up to tens of millions of datums/sec
+serial or parallel generation :ul
+
+The computations performed by the "analytics"_analytics.html have the
+following attributes:
+
+well-defined and relatively easy to implement
+allow for use of more sophisticated data structures and algorithms
+scoring metrics for the processing rate and accuracy of the result
+allow for serial or parallel implementation (shared or distributed memory) :ul
+
+The FireHose tarball provides code for each generator.  They are meant
+to be used as-is, without modification.  The tarball also provides
+sample implementations of the analytics, but users are free to
+re-implement them in a manner optimized for their streaming framework
+or their machine, or with better algorithms, so long as they follow
+the rules of the benchmark and measure the relevant scoring metrics.
+
+UDP sockets are used as the link between the generator and analytic,
+so that the generator is not throttled by the analytic, just as in
+stream processing scenarios where data must be processed as it appears
+in real-time.  The UDP protocol means the analytic will drop datums if
+it cannot keep up with the generated stream, which is one of the
+effects we wish to measure.

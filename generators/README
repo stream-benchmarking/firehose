@@ -1,0 +1,6 @@
+This directory contains code for stream generators, as discussed
+in doc/generators.html.
+
+powerlaw = powerlaw generator of biased key/value pairs
+active = active set generator of biased key/value pairs
+twolevel = two-level generator of outer and inner key/value pairs

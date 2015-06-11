@@ -1,0 +1,12 @@
+true anomaly = 1000000065
+true anomaly = 1000000183
+true anomaly = 1000000333
+
+packets received = 10000
+datums received = 500000
+unique keys = 8296
+max occurrence of any key = 166654
+true anomalies = 3
+false positives = 0
+false negatives = 0
+true negatives = 460

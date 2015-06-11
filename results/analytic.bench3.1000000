@@ -1,0 +1,26 @@
+true anomaly = 5988228440328453002
+true anomaly = 421481297385686631
+true anomaly = 13818534487523274984
+true anomaly = 16834765661468674390
+true anomaly = 12359620867206941275
+false positive = 11727239042331584044
+true anomaly = 9978587122925016971
+true anomaly = 16936743250944644617
+false positive = 5406163141942597191
+true anomaly = 11883596058160811355
+true anomaly = 12340541115407201233
+true anomaly = 14057818086571344624
+true anomaly = 8250414880177571938
+true anomaly = 8253861475170350308
+true anomaly = 6201007142084677947
+true anomaly = 1263908320843374150
+true anomaly = 15283450439199529566
+
+packets received = 1000000
+datums received = 40000000
+unique outer keys = 24005720
+unique inner keys = 475860
+true anomalies = 15
+false positives = 2
+false negatives = 0
+true negatives = 5204

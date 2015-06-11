@@ -1,0 +1,352 @@
+"Previous Section"_generators.html - "FireHose WWW Site"_fws - "Next Section"_run.html :c
+
+:link(fws,README.html)
+
+Analytics :h3
+
+The current version of FireHose has three analytics:
+
+"anomaly1"_#anomaly1 = anomaly detection in a fixed key range
+"anomaly2"_#anomaly2 = anomaly detection in an unbounded key range
+"anomaly3"_#anomaly3 = anomaly detection in a two-level key space :ol
+
+Source code for these is in the tarball directory "analytics".  Each
+sub-directory has code for multiple versions of the analytic,
+developed in different languages and for different streaming
+frameworks.  Instructions for how to build and run the analytics is
+given in the "Running the benchmarks"_run.html section.
+
+These are the implementations we currently provide.  Over time, as
+users contribute them, we hope to add more implementations of the
+analytics, written for various streaming frameworks.
+
+C++: This is a reference implementation which runs on a single core.
+It can be examined to learn details of how the analytic is defined and
+can be implemented efficiently.  Typically it is a single file. :ulb,l
+
+Python: This is also a reference implementation which runs on a single
+core.  It is typically more concise than its C++ counterpart, but will
+not run as efficiently.  :l
+
+PHISH: These are implementions in C++ and/or Python which run on top
+of the "PHISH library"_PHISH.  PHISH is a lightweight, open-source
+framework for processing streaming data with distributed-memory
+parallelism.  It passes datums between processes running on one or
+more cores via message-passing, using either the "MPI"_mpi
+(message-passing) or "ZMQ"_zmq (sockets) library as a back-end.  The
+processes are stand-alone programs (C, C++, Python, etc) which, in
+this case, contain code similar to what is found in the serial
+implementations of the analytic. :l,ule
+
+:link(PHISH,http://www.sandia.gov/~sjplimp/phish.html)
+:link(mpi,http://en.wikipedia.org/wiki/Message_Passing_Interface)
+:link(zmq,http://www.zeromq.org)
+
+As explained below, each analytic is required to perform a specific
+computation on the streaming data it receives via a UDP port from one
+of the stream generators described in the "Generators"_generators.html
+section.  The format of the stream is defined by the generator.
+
+An implementation of the analytic should follow the rules discussed
+below.  Most importantly, it should be robust to the possibility it
+will miss packets in the stream which arrive before the analytic is
+ready to read them.  This is because the generators can be run at high
+rates, which may outpace the analytic.
+
+If you wish to implement an analytic yourself, or to run a benchmark
+on your hardware, you are free to implement it in a different manner
+from the provided code.  But you need to perform the computations
+outlined below and adhere to the following guidelines, at least if you
+wish to contribute your implementation to the code archive and your
+performance results to the "Results"_results.html section.
+
+The analytic should not archive (e.g. to disk) the entire stream or
+large portions thereof and perform its computation when the stream
+ends.  This violates the spirit of a streaming benchmark and would not
+work in practice when the stream is infinite. :ulb,l
+
+As described in the "Generators"_generators.html section, when running
+in parallel to achieve higher stream rates, each instance of a
+generator will emit keys that do not overlap with the keys of the
+other generators.  This is to make it easier to check for correct
+answers and score the results.  However, the analytic cannot take
+advantage of this fact.  It must assume that a datum (and its key)
+could have come from any of the generators.  Thus it is not
+permissible, for example, to process a stream coming from N generators
+as N independent streams being read by N copies of an analytic
+program, each processing its own unique set of keys. :l
+
+Each analytic takes a single argument which is the UDP port ID to read
+the stream from.  Each analytic may also define optional command-line
+switches, useful either to pass in stream parameters, or for
+debugging.  The options for the serial implementations are listed
+below.  Versions written for different frameworks may define different
+optional arguments.  Check the README files in the implementation
+sub-directories for details. :l
+
+While an analytic is running, it should print results to the screen as
+it finds them, i.e. in real-time as it identifies anomalies.  This
+needs to be in the format described below so that the results can be
+checked against the correct answer, for scoring purposes.  See the
+"Results"_results.html section for details. :l
+
+The analytic must implement logic for detecting when the stream ends.
+As described in the "Generators"_generators.html section, this is done
+by checking for specially-formatted STOP packets.  If a single
+generator is sending to an analytic, this is a simple check.  The
+logic is more convoluted if multiple generators are sending data to
+the analytic.  See the reference implementations for an example of how
+this can be handled. :l
+
+When the analytic terminates, it should print final statistics on the
+number of packets it received, as well as summaries of its
+computations, as discussed below.  These are useful for debugging and
+are used in the scoring metrics.  Some of the summary values also
+appear in the tables of the "Results"_results.html section. :l,ule
+
+Any additional anayltic-specific rules are discussed below.
+
+:line
+:line
+
+(1) Anomaly detection in a fixed key range :h4,link(anomaly1)
+
+This analytic is designed as a simple test of anomaly detection; keys
+are flagged as unbiased or biased (anomalous) depending on the values
+associated with an individual key as it appears multiple times.  Only
+a small fraction of the keys are biased.
+
+It is designed for use with the "biased-powerlaw
+generator"_generators.html#bias, which produces packets of datums,
+each of which is an ASCII text string in the following format:
+
+1000582694,0,1 :pre
+
+The first field is a "key", which can be represented internally as a
+64-bit unsigned integer.  The second field is a "value" of 0 or 1.
+The third field is a "truth" flag, also 0 or 1.
+
+The computational task for this analytic is to identify biased keys.
+An unbiased key will have 0 versus 1 values appear with equal
+probability.  A biased key will have 0 versus 1 values appear in a
+skewed 15:1 probability ratio.
+
+Detection can be performed by keeping track of the values seen for
+each key, e.g. in a hash table of fixed size (see below).  When an
+individual key has been seen 24 times, the key is labeled "biased" if
+a value of 1 appeared 4 or less times; otherwise the key is labeled
+"unbiased".  When the decision is made, the answer is checked against
+the "truth" flag appended to each datum.  The large majority of the
+results will be keys correctly flagged as unbiased (true
+negative). The other 3 cases are more rare; the count for each of the
+4 categories is tallied by the analytic:
+
+true anomalies = keys correctly flagged as biased
+false positives = keys incorrectly flagged as biased
+false negatives = keys incorrectly flagged as unbiased
+true negatives = keys correctly flagged as unbiased :ul
+
+The analytic also emits a line of output when a detection event in one
+of the first 3 categories occurs, in this format, where the last field
+is the key:
+
+true anomaly = 12345
+false positive = 34567
+false negative = 67890 :pre
+
+Note that due to statistical variation in the way the generator
+produces random values, for the 3 rare outcomes, true anomalies should
+mostly be detected, but about 20% of the rare cases will be false
+positives, with an occasional false negative as well.
+
+The analytic also keeps track of the following statistics which are
+printed in the following format at the end of the benchmark:
+
+packets received = 999986 
+datums received = 49999300 
+unique keys = 85578 
+max occurrence of any key = 16709489 
+true anomalies = 34
+false positives = 6
+false negatives = 0 
+true negatives = 3220 :pre
+
+A reasonable way to implement this analytic is with a hash table that
+stores a running tally of the values seen for each unique key.  Note
+that the analytic does not know how many times an individual key will
+appear in the stream, though it need not retain a key after it has
+been seen 24 times.
+
+Optional command-line switches in the serial reference implementations
+(C++ and Python):
+
+-b = bundling factor = # of datums in one packet, default = 50
+-t = check key for bias when appears this many times, default = 24
+-m = key is biased if value=1 <= this many times, default = 4
+-p = # of generators sending to me, only used to count STOP packets, default = 1
+-c = 1 to print stats on packets received from each sender, default = 0 :ul
+
+Additional implementation rules:
+
+The "biased-powerlaw generator"_generators.html#bias is hard-wired to
+produce at most 100,000 unique keys per instance of the generator.  It
+is OK for the analytic to know and use this value, e.g. to
+pre-allocate memory for a hash table of fixed size.  Note that for
+good performance this size should typically be a multiple of the
+number of generators contributing to the stream (see the -p switch),
+since the keys each generator emits do not overlap. :ulb,l
+
+The truth flag cannot be used, except to check answers. :l,ule
+
+:line
+:line
+
+(2) Anomaly detection in an unbounded key range :h4,link(anomaly2)
+
+This analytic is also designed as a simple test of anomaly detection;
+keys are flagged as unbiased or biased depending on the values
+associated with an individual key as it appears multiple times.
+However the number of unique keys in the stream is effectively
+infinite for long benchmark runs, so the analytic must decide which
+keys to store state for.
+
+It is designed for use with the "active set
+generator"_generators.html#active, which samples from an unbounded
+range of keys.
+
+In benchmark runs using this analytic, huge numbers of unique keys
+will be generated, which means it will be inefficient to use a hash
+table to store all of them, unless some provision for expiring keys is
+implemented (see below).
+
+Aside from this change in the distribution of keys in the data stream,
+the computational task of detecting biased keys is identical to the
+decscription for "analytic #1"_#anomaly1, as is the format of output
+the analytic should generate.  The only exception is that a final
+output for "max occurrence of any key" is no longer a relevant value
+to tally.
+
+A reasonable way to implement this analytic is with an expiring hash
+table that attempts to keep track of values for keys in the active set
+of the generator, e.g. via a least-recently used (LRU) metric, where
+the key selected for expiration (removal from the hash table) is the
+one seen longest ago in the stream.  As discussed below, the size of
+the set of active keys is limited by the generator which can be used
+by the analytic to age keys efficiently.  Note however that the
+analytic does not knowhow many times an individual key will remain in
+the generator's active set or appear in the stream, though it need not
+retain a key after it has been seen 24 times.
+
+Optional command-line switches in the serial reference implementations
+(C++ and Python):
+
+-b = bundling factor = # of datums in one packet, default = 50
+-t = check key for bias when appears this many times, default = 24
+-m = key is biased if value=1 <= this many times, default = 4
+-p = # of generators sending to me, only used to count STOP packets, default = 1
+-c = 1 to print stats on packets received from each sender, default = 0
+-a = size of active key set, default = 131072 (128K) :ul
+
+Additional implementation rules:
+
+The "active-set generator"_generators.html#active is hard-wired to use
+an active set size of 131072 (128K) keys.  It is OK for the analytic
+to know and use this value (see the -a switch above), e.g. to setup an
+expiring hash table that keeps only the most recently seen N keys.
+Since the analytic does not know which keys the generator keeps in its
+active set, N should be larger than the active set size, so that it is
+unlikely to expire a key that the generator still treats as active.  A
+good value for N is 2x the active set size.  Note that the size of the
+active set seen by the analytic is effectively a multiple of the
+number of generators contributing to the stream (see the -p switch),
+since the keys each generator emits do not overlap. :ulb,l
+
+The truth flag cannot be used, except to check answers. :l,ule
+
+:line
+:line
+
+(3) Anomaly detection in a two-level key space :h4,link(anomaly3)
+
+This analytic also performs anomaly detection; a set of keys are
+flagged as unbiased or biased depending on the values associated with
+an individual key as it appears multiple times.  However, the
+key/value pairs for which the bias detection is done, are derived from
+state information that must be stored for a different set of keys,
+namely those which appear in the data stream.  This requires two
+iterations of storage and lookup in different hash tables.
+
+It is designed for use with the "two-level
+generator"_generators.html#twolevel, which produces packets of datums,
+each of which is an ASCII text string in the following format:
+
+3929309884956,57364,1 :pre
+
+As explained on the doc page for the "two-level
+generator"_generators.html#twolevel, the first field is an "outer" key
+(64-bit unsigned integer), the second field (16-bit unsigned integer)
+is a portion of an "inner" key, and the the third field is a "counter"
+for how many times the outer key has been emitted.
+
+The first 4 times the outer key is seen, the analytic should store the
+4 values.  The fifth time the outer key is seen, the 4 previous values
+are concatenated (right to left, i.e. low-order to high-order) into a
+new "inner" key, which also becomes a 64-bit unsigned integer.  The
+value for the inner key is the rightmost digit of the value for the
+fifth occurrence of the outer key, which is a 0 or 1.
+
+The inner key/value pairs are treated the same as the key/value pairs
+in the "first analytic"_#anomaly1 and checked for bias.  I.e. when an
+individual inner key has been seen 24 times, the inner key is labeled
+"biased" if a value of 1 appeared 4 or less times; otherwise the inner
+key is labeled "unbiased".  When the decision is made, the answer is
+checked against the "truth" flag, which was the leftmost digit in the
+value of the fifth occurrence of any of the outer keys which generated
+this inner key.
+
+The four categories (true anomalies, false positives, false negatives,
+true negatives) of inner keys, and the format of output the analytic
+should generate, is the same as described above for the "anomaly1
+analytic"_#anomaly1.  As in the second analytic, the only exception is
+the final output of "max occurrence of any key" is no longer a
+relevant value to tally.
+
+Note that if packets are dropped, the analytic should not try to
+construct inner keys from incomplete information.  The third counter
+field in the outer key datum can be monitored to insure a specific
+outer key is seen all 5 times it is needed.
+
+A reasonable way to implement this analytic is with two expiring hash
+tables, one for outer keys and another for inner keys, and to expire
+keys from each via a least-recently used (LRU) strategy, as explained
+for the "anomaly2 analytic"_#analytic2.  Outer keys will be emitted at
+most 5 times (but may be emitted less); individual inner keys will be
+encoded in the stream an unknown number of times.
+
+Optional command-line switches in the serial reference implementations
+(C++ and Python):
+
+-b = bundling factor = # of datums in one packet, default = 50
+-t = check key for bias when appears this many times, default = 24
+-m = key is biased if value=1 <= this many times, default = 4
+-p = # of generators sending to me, only used to count STOP packets, default = 1
+-c = 1 to print stats on packets received from each sender, default = 0
+-a = size of active key set, default = 131072 (128K) :ul
+
+Additional implementation rules:
+
+The "two-level generator"_generators.html#active is hard-wired to use
+active set sizes of 131072 (128K) keys for both the outer keys it
+generates explicitly and the inner keys it generates implicitly.  It
+is OK for the analytic to know and use this value (see the -a switch
+above), e.g. to setup expiring hash tables that keep only the most
+recently seen N keys.  Since the analytic has no way of knowing which
+keys the generator keeps in its active sets, N should be larger than
+the active set size, so that it is unlikely to expire a key that the
+generator still treats as active.  For both hash tables, a good value
+for N is 2x the active set size.  Note that the size of the active set
+seen by the analytic is effectively a multiple of the number of
+generators contributing to the stream (see the -p switch), since the
+keys each generator emits do not overlap. :ulb,l
+
+The truth flag cannot be used, except to check answers. :l,ule

@@ -1,0 +1,6 @@
+This directory has tools useful for running the FireHose benchmarks
+and analyzing their performance, as discussed in doc/run.html.
+
+bench.py - a sample script that invokes a series of runs via launch.py
+launch.py - run and score benchmarks, see header of file for options
+launch.sh - shell script for launching multiple generators simultaneously

@@ -1,0 +1,9 @@
+
+packets received = 10000
+datums received = 400000
+unique outer keys = 293101
+unique inner keys = 0
+true anomalies = 0
+false positives = 0
+false negatives = 0
+true negatives = 0

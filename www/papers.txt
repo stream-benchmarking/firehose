@@ -1,0 +1,10 @@
+"FireHose WWW Site"_pws :c
+:link(pws,../firehose.html)
+
+:line
+
+FireHose Papers :h3
+
+If you write a paper using the FireHose suite, "send us an
+email"_authors.html, and we'd be happy to post a citation to it on
+this page.

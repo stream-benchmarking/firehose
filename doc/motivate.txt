@@ -1,0 +1,52 @@
+"Previous Section"_fws - "FireHose WWW Site"_fws - "Next Section"_design.html :c
+
+:link(fws,README.html)
+
+Motivation :h3
+
+Streaming data arrives continuously and in volumes and rates that are
+ever increasing.  Timely processing of streaming data is
+computationally challenging due to limited resources.  These include
+limited CPU operations that can be performed on a datum before the
+next one arrives, limited memory for storing state information about
+the stream, limited disk storage for the data itself so that the
+datums may only be seen once, and limited budgets for energy
+consumption or CPU/memory/disk resources.
+
+In some settings, it's not known in advance what interesting features
+are embedded in the stream of data.  In an algorithmic sense, this
+makes the above limitations even more challenging.  In addition, the
+hardware options for collecting streaming data are increasing in
+variety and capability from multicore CPUs, to GPUs, to
+special-purpose processors like Tilera chips, to solid-state (Flash)
+disks.  While choices are a good thing, they also challenge developers
+of stream-processing software to support a growing range of hardware.
+
+Computing on streaming data has been referred to as "drinking from a
+firehose".  Hence the name FireHose for this suite of stream
+processing benchmarks.
+
+The main purpose of FireHose is to enable comparison of streaming
+software and hardware, both {quantitatively} vis-a-vis the rate at
+which they can process data, and {qualitatively} by judging the effort
+involved to implement and run the benchmarks.  Because we are both
+users and designers of software for stream processing, we have wanted
+for some time to define useful metrics for the speed and flexibility
+various software/hardware solutions can offer.  FireHose represents
+our initial effort in this regard.
+
+We plan to release the benchmark definitions and sample implementation
+code openly on the FireHose web site, so that anyone can implement
+them with their own stream-processing software and/or run them on
+their own hardware.  Our hope is that this effort will generate
+interest and feedback from the academic and commercial streaming
+communities.  With their help in refining and exanding the suite of
+benchmarks, and their contributions of performance results, we hope
+the FireHose benchmarks can become a valuable resource for those
+interested in stream processing.
+
+The initial benchmarks in the FireHose suite reflect common tasks
+typical of real-time processing of network packets arriving at high
+rates as a network is monitored, e.g. for cybersecurity purposes.  We
+plan to augment the suite with benchmarks that process streaming graph
+edges, and are open to additional suggestions as well.

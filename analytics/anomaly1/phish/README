@@ -1,0 +1,46 @@
+This is a PHISH version of the first analytic = anomaly1.
+
+You can download and install the PHISH Library by going
+to this WWW site and following the installations
+instructions in the manual: http://www.sandia.gov/~sjplimp/phish.html.
+
+Once PHISH is installed, you can build the PHISH minnows
+in this directory by typing:
+
+% make linux.mpi   # for the MPI backend
+% make linux.zmq   # for the ZMQ backend
+
+This requires you have either the MPI or ZMQ libraries on
+your machine.  These are fairly standard, but see the PHISH
+documentation for details.  You may have to edit either
+Makefile.linux.mpi and Makefile.linux.zmq to make them
+suitable for the environment on your box.
+
+To run the PHISH implementaion of the analytic, you can type one of
+the following bait commands, which assume you have installed PHISH in
+a directory "phish" in your home directory.
+
+% cd analytics/anomaly1/phish
+% python ~/phish/bait/bait.py < in.anomaly
+% python ~/phish/bait/bait.py -v k 4 -v a 2 < in.parallel
+% python ~/phish/bait/bait.py -l python -x .py -s safe 10000 < in.anomaly
+% python ~/phish/bait/bait.py -l python -x .py -v k 4 -a 2 -s safe 10000 < in.parallel
+% python ~/phish/bait/bait.py -p .:/home/sjplimp/phish/minnow < in.udp :pre
+
+The runs with the in.anomaly script create 2 processes, one to read
+the packets and one to perform the anomaly detection.  The PHISH
+framework sends each packet as a message between the 2 processes.  The
+runs with the in.parallel script launches 7 processes: one to read
+packets, 4 to re-bundle them into new messages, and 2 to perform the
+analytic computation.  Each of the 2 analytics now operates on a
+subset of the keys, so that the stream is effectively split across
+processors to enable faster computation in parallel.  This means that
+faster stream rates can be processed, as shown in the "Results
+section"_results.html.
+
+Python versions of the minnows can also be run; the safe setting is
+needed for those bait commands to avoid MPI overflows due to the high
+input rate of data from the generator.
+
+The in.udp script can also be run, which will simply echo generated
+packets to the screen.

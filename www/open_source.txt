@@ -1,0 +1,27 @@
+"FireHose WWW Site"_pws :c
+:link(pws,index.html)
+
+:line
+
+Open-Source Distribution :h3
+
+The FireHose suite is licensed under the modified "Berkeley Software
+Distribution (BSD) License"_bsd.  This is a very non-restrictive
+license which basically means the library can be used by anyone for
+any purpose, including commercial ones.
+
+The legal text for the license is in the LICENSE file included in the
+FireHose distribution.  As stated there, the FireHose library comes with no
+warranty of any kind.  The copyright notice is listed in the header of
+each source file.
+
+See "www.gnu.org"_gnuorg or "www.opensource.org"_opensource for a
+discussion of the open source philosophy.
+
+See "this page"_contribute.html for ways you can contribute to the
+FireHose library.
+
+:link(bsd,http://en.wikipedia.org/wiki/BSD_license)
+:link(gnuorg,http://www.gnu.org)
+:link(opensource,http://www.opensource.org)
+
