@@ -5,6 +5,8 @@
 
 Open-Source Distribution :h3
 
+Copyright (2013) Sandia Corporation. Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains certain rights in this software.
+
 The FireHose suite is licensed under the modified "Berkeley Software
 Distribution (BSD) License"_bsd.  This is a very non-restrictive
 license which basically means the library can be used by anyone for
