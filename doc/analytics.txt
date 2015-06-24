@@ -1,5 +1,7 @@
 "Previous Section"_generators.html - "FireHose WWW Site"_fws - "Next Section"_run.html :c
 
+<BODY>
+
 :link(fws,README.html)
 
 Analytics :h3
@@ -350,3 +352,7 @@ generators contributing to the stream (see the -p switch), since the
 keys each generator emits do not overlap. :ulb,l
 
 The truth flag cannot be used, except to check answers. :l,ule
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>

@@ -1,5 +1,7 @@
 "Previous Section"_design.html - "FireHose WWW Site"_fws - "Next Section"_analytics.html :c
 
+<BODY>
+
 :link(fws,README.html)
 
 Generators :h3
@@ -336,3 +338,7 @@ datums/packet.  An aggregate rate of 20M datums/sec can be achieved.
 :image(images/plotgen3b_small.jpg,images/plotgen3b.jpg)
 
 Click on the plots for a larger version.
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>

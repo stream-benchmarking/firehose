@@ -1,5 +1,7 @@
 "Previous Section"_fws - "FireHose WWW Site"_fws - "Next Section"_design.html :c
 
+<BODY>
+
 :link(fws,README.html)
 
 Motivation :h3
@@ -50,3 +52,7 @@ typical of real-time processing of network packets arriving at high
 rates as a network is monitored, e.g. for cybersecurity purposes.  We
 plan to augment the suite with benchmarks that process streaming graph
 edges, and are open to additional suggestions as well.
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>

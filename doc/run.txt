@@ -1,5 +1,7 @@
 "Previous Section"_analytics.html - "FireHose WWW Site"_fws - "Next Section"_results.html :c
 
+<BODY>
+
 :link(fws,README.html)
 
 Running the benchmarks :h3
@@ -564,3 +566,7 @@ Then a kill command such as this:
 % kill 93985 :pre
 
 can be invoked on the ID to explicitly kill a running generator.
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>

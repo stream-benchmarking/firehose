@@ -35,4 +35,6 @@ Labs).
 "Running the benchmarks"_run.html
 "Results"_results.html :ul
 
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
 </BODY>
