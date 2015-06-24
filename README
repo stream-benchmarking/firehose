@@ -22,10 +22,9 @@ are free to re-implement them for other streaming frameworks or to
 optimize them for their hardware.
 
 The originators of FireHose are Karl Anderson and Steve Plimpton, who
-can be contacted at keander@sandia.gov and sjplimp@sandia.gov.  The
-FireHose WWW Site at http://firehose.sandia.gov (when it is put
-on-line) has more information as well as tabulated performance
-results.
+can be contacted at sjplimp@sandia.gov.  The FireHose WWW Site at
+http://firehose.sandia.gov has more information as well as tabulated
+performance results.
 
 This FireHose distribution includes the following files and
 directories:

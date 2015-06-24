@@ -7,7 +7,7 @@
 
 FireHose Authors :h3
 
-The authors of the FireHose suite are Karl Anderson (keander at sandia.gov) and "Steve Plimpton"_sjp (sjplimp at sandia.gov).
+The authors of the FireHose suite are Karl Anderson and "Steve Plimpton"_sjp (sjplimp at sandia.gov).
 
 :link(sjp,http://www.sandia.gov/~sjplimp)
 
