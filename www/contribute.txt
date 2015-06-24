@@ -1,6 +1,8 @@
 "FireHose WWW Site"_pws :c
 :link(pws,index.html)
 
+<BODY>
+
 :line
 
 Contributing to the FireHose suite :h3
@@ -25,3 +27,7 @@ If you publish a paper using FireHose, send the citation to us and we can
 add it to the Publications page. :l
 
 Contribute a new analytic or generator to be added to the suite. :ule,l
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>

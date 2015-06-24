@@ -8,6 +8,7 @@
     <link rev="made, publisher" title="Steve Plimpton" href="mailto:sjplimp@sandia.gov" />
     <meta name="Author" content="Steve Plimpton" />
 </HEAD>
+<BODY>
 
 FireHose Streaming Benchmarks :c,h3
 
@@ -54,3 +55,7 @@ Security statement"_security.
 :link(bsd,http://en.wikipedia.org/wiki/BSD_license)
 :link(sjp,http://www.sandia.gov/~sjplimp)
 :link(dnl,http://github.com/stream-benchmarking/firehose)
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>

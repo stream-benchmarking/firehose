@@ -1,6 +1,8 @@
 "PHISH WWW Site"_pws :c
 :link(pws,../phish.html)
 
+<BODY>
+
 :line
 
 PHISH Pheatures :h3
@@ -72,3 +74,7 @@ calculation on the fly. :l
 PHISH minnows are included that wrap non-PHISH applications that read
 from stdin and/or write to stdout.  This allows such an application to
 be used in a PHISH net and exchange data with other minnows. :l,ule
+
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>
