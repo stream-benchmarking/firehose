@@ -60,7 +60,7 @@ typedef struct _active_ring_t {
   uint32_t max;
   uint32_t current;
   uint32_t offset[TREND_POINTS];
-  uint32_t cnt_dist[MAX_DISTRO];
+  uint32_t cnt_dist[MAX_DISTRO+1];
   active_el_t *el_set;
   uint64_t nextid;
   uint64_t keys_generated;
