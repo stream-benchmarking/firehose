@@ -1,0 +1,9 @@
+
+# ignore object files
+*.o
+
+# ignore generator executables
+generators/active/active
+generators/powerlaw/powerlaw
+generators/twolevel/twolevel
+
