@@ -192,7 +192,7 @@ static void generate_cnt_distribution(active_ring_t * aring, uint32_t max_cnt)
   for (i = 1; i <= MAX_DISTRO; i++) {
     double v =
       (double)max_cnt * (pow((double)i,POW_EXP) - min) * inv_diff;
-    aring->cnt_dist[i] = (uint32_t)floor(v) + 1;
+    aring->cnt_dist[i-1] = (uint32_t)floor(v) + 1;
   }
 }
 
