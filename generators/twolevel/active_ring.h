@@ -9,7 +9,7 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
-#include "evahash.h"
+#include "../include/evahash.h"
 
 
 #define MAX_DISTRO 65536

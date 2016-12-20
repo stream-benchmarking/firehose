@@ -4,6 +4,7 @@
 // Network headers
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -31,6 +32,7 @@ typedef struct _udp_throw_t {
      socklen_t socklen;
      int clientcnt;
      udpt_client_list_t * clients;
+     udpt_client_list_t * next_client;
 } udp_throw_t;
 
 static void udp_throw_destroy(udp_throw_t * udpt) {
@@ -118,22 +120,51 @@ static int udp_throw_init_peer(udp_throw_t * udpt, char * peer, uint16_t default
      return ret;
 }
 
-static inline int udp_throw_data(udp_throw_t * thrower, char * buf, int buflen) {
-     udpt_client_list_t * client;
-     int out = 0;
+static int udp_throw_init_peers_fromfile(udp_throw_t * udpt, char * filename, uint16_t defaultport) {
+     FILE * fp;
+     int peers = 0;
 
-     for (client = thrower->clients; client; client = client->next) {
-          if (sendto(thrower->s, buf, buflen, 0,
-                     (struct sockaddr *)&(client->sock),
-                     thrower->socklen) == -1) {
-               perror("sendto()");
+     fp = fopen(filename, "r");
+     if (!fp) {
+          return 0;
+     }
+     char line[1024];
+     //read in line
+
+     while (fgets(line, 1024, fp)) {
+          int len = strlen(line);
+          if (line[len - 1] == '\n') {
+               line[len - 1] = '\0';
+               len--;
           }
-          else {
-               out++;
+          peers += udp_throw_init_peer(udpt, line, defaultport);
+     }
+
+     return peers;
+}
+
+
+static inline int udp_throw_data(udp_throw_t * thrower, char * buf, int buflen) {
+     udpt_client_list_t * client = thrower->next_client;
+
+     //force round-robin throw
+     if (!client) {
+          //reset to head
+          client = thrower->clients;
+          if (!client) {
+               return 0;
           }
      }
-     return out;
+     thrower->next_client = client->next;
+     if (sendto(thrower->s, buf, buflen, 0,
+                (struct sockaddr *)&(client->sock),
+                thrower->socklen) == -1) {
+          perror("sendto()");
+          return 0;
+     }
+     return 1;
 }
+
 
 static inline udp_throw_t * udp_throw_init(uint16_t port) {
      udp_throw_t * thrower = (udp_throw_t*)calloc(1, sizeof(udp_throw_t));

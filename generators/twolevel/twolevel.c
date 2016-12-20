@@ -10,8 +10,8 @@
 #include <unistd.h>
 
 #include "active_ring.h"
-#include "evahash.h"
-#include "udp_throw.h"
+#include "../include/evahash.h"
+#include "../include/udp_throw.h"
 
 // UDP ports
 
@@ -98,8 +98,8 @@ double myclock()
 void read_cmd_options(int argc, char ** argv)
 {
   register int op;
-
-  while ( (op = getopt(argc, argv, "n:b:r:p:x:s:")) != EOF) {
+  char * filename = NULL;
+  while ( (op = getopt(argc, argv, "n:b:r:p:x:s:F:")) != EOF) {
     switch (op) {
     case 'n':
       npacket = strtoul(optarg,NULL,0);
@@ -119,10 +119,13 @@ void read_cmd_options(int argc, char ** argv)
     case 's':
       seed = atoi(optarg);
       break;
+    case 'F':
+      filename = optarg;
+      break;
     }
   }
 
-  if (optind == argc) {
+  if (!filename && (optind == argc)) {
     fprintf(stderr,"Syntax: twolevel options hostname\n");
     exit(1);
   }
@@ -141,6 +144,11 @@ void read_cmd_options(int argc, char ** argv)
   while (optind < argc) {
     udp_throw_init_peer(udpt,argv[optind],DEFAULT_PORT);
     optind++;
+  }
+  if (filename) {
+    int peers = udp_throw_init_peers_fromfile(udpt, filename,
+                                              DEFAULT_PORT);
+     fprintf(stderr, "initialized %d peers from file", peers);
   }
 }
 
