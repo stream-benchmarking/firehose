@@ -43,13 +43,6 @@ Labs).
 
 :line
 
-Copyright (2013) Sandia Corporation. Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains certain rights in this software.
-
-The FireHose WWW site is hosted by Sandia, which has this "Privacy and
-Security statement"_security.
-
-:link(security,http://www.sandia.gov/general/privacy-security/index.html)
-
 :link(snl,http://www.sandia.gov)
 :link(doe,http://www.doe.gov)
 :link(bsd,http://en.wikipedia.org/wiki/BSD_license)
