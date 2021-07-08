@@ -14,12 +14,15 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include <argp.h> // Argument parsing
+
 #include <stdexcept>
 #include <signal.h>
 #include <netinet/in.h>
 #include <sys/errno.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h> // ::close()
 
 #include <vector>
 #include <tr1/unordered_map>
