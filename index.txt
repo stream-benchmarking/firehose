@@ -10,7 +10,7 @@
 </HEAD>
 <BODY>
 
-FireHose Streaming Benchmarks :c,h3
+FireHose Streaming Benchmarks :c,h2
 
 <center>
 :c,image(images/firehose.jpg)
