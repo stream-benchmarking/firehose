@@ -1,0 +1,582 @@
+<HTML>
+<CENTER><A HREF = "analytics.html">Previous Section</A> - <A HREF = "README.html">FireHose WWW Site</A> - <A HREF = "results.html">Next Section</A> 
+</CENTER>
+<BODY>
+
+
+
+<H3>Running the benchmarks 
+</H3>
+<P>The current version of FireHose defines three benchmarks:
+</P>
+<OL><LI><A HREF = "#anomaly1">anomaly1</A> = anomaly detection in a fixed key range
+<LI><A HREF = "#anomaly2">anomaly2</A> = anomaly detection in an unbounded key range
+<LI><A HREF = "#anomaly3">anomaly3</A> = anomaly detection in a two-level key space 
+</OL>
+<P>Each benchmark uses a specific stream <A HREF = "generator.html">generator</A> and a
+specific <A HREF = "analytics.html">analytic</A>, as discussed below.  Multiple
+copies of a generator may be run to create higher-bandwidth streams,
+writing either to a single or multiple UDP ports.  An implementation
+of the analytic can be run in serial or parallel (shared or
+distributed memory), so it may also choose to read from multiple UDP
+ports.
+</P>
+<P>Currently, we advise running both the generator(s) and the analytic on
+a single (multicore) box.  This will test performance of the analytic
+without bottlenecks associated with network bandwidths or latencies.
+However, the generators and analytics can be run on different boxes
+(across a network) which has the advantage that the box running the
+analytic will devote no CPU cycles to generating the stream.
+</P>
+<P>IMPORTANT NOTE: A single FireHose generator running on a single core,
+may generate as much as 50 Mbytes of data per second.  Since the UDP
+protocol means no receiver is throttling the sender, injecting the
+stream as UDP packets into a network can quickly saturate available
+bandwidth and have a negative impact on network performance,
+</P>
+<P>This page has the following sub-sections:
+</P>
+<UL><LI><A HREF = "#build">Building the generators and analytics</A>
+<LI><A HREF = "#testgeb">Testing the generators</A>
+<LI><A HREF = "#testanalytic">Testing the analytics</A>
+<LI><A HREF = "#tuning">Tuning your machine</A>
+<LI><A HREF = "#bench1">Benchmark #1 - anomaly detection in a fixed key range</A>
+<LI><A HREF = "#bench2">Benchmark #2 - anomaly detection in an unbounded key range</A>
+<LI><A HREF = "#bench3">Benchmark #3 - anomaly detection in a two-level key space</A>
+<LI><A HREF = "#launch">Using the launch.py script to run benchmarks</A>
+<LI><A HREF = "#kill">Killing instances of running generators</A> 
+</UL>
+<HR>
+
+<HR>
+
+<H4><A NAME = "build"></A>Building the generators and analytics 
+</H4>
+<P>Each of the <A HREF = "generators.html">generators</A> can be built from the
+appropriate directory as follows:
+</P>
+<PRE>% cd generators/powerlaw
+% make 
+</PRE>
+<P>The generator makefiles use gcc as the compiler.  You can edit the
+makefiles to use another compiler or if some setting needs to be
+changed for your machine.
+</P>
+<P>The serial C++ versions of the <A HREF = "analytics.html">analytics</A> can be built
+from the appropriate directory as follows:
+</P>
+<PRE>% cd analytics/anomaly1/c++
+% make 
+</PRE>
+<P>The serial Python versions of the analytics do not need to be built.
+</P>
+<P>Other implementations of the analytics may need to be built in
+different manners.  See the README in the sub-directory for those
+implementations for details.
+</P>
+<P>For example the PHISH implementation requires you have the <A HREF = "http://www.sandia.gov/~sjplimp/phish.html">PHISH
+Library</A> installed on your box as well as either an MPI or ZMQ
+library that PHISH uses.  Once PHISH is installed, e.g. with the MPI
+back-end, you can type
+</P>
+<PRE>% cd analytics/anomaly1/phish
+% make linux.mpi 
+</PRE>
+<P>to build the PHISH "minnows" that are invoked when a PHISH input
+script is launched.
+</P>
+
+
+<P>The analytic makefiles (for c++ and PHISH) use g++ as the compiler.
+You can edit the makefiles to use another compiler or if some setting
+needs to be changed for your machine.
+</P>
+<HR>
+
+<H4><A NAME = "testgen"></A>Testing the generators 
+</H4>
+<P>You can test any of the generators, without running an analytic, as
+follows.  In one window, type
+</P>
+<PRE>% nc -l -u 55555 
+</PRE>
+<P>Then in another window, type the following (for the powerlaw
+generator):
+</P>
+<PRE>% cd generators/powerlaw
+% powerlaw 127.0.0.1 
+</PRE>
+<P>This should trigger a rapid output of packets and their datums in the
+first window.  If you let the generator run long enough, it will print
+a summary message like the following, when it is finished generating
+all its packets:
+</P>
+<PRE>packets emitted = 1000000
+datums emitted = 50000000
+elapsed time (secs) = 15.6978
+generation rate (datums/sec) = 3.18516e+06 
+</PRE>
+<P>Neither the generator or the "nc" command will exit.  Kill both of
+them with a Ctrl-C.
+</P>
+<HR>
+
+<H4><A NAME = "testanalytic"></A>Testing the analytics 
+</H4>
+<P>You can only test one of the anayltics by running it in tandem with
+the corresponding generator.  The steps for doing this are as follows:
+</P>
+<OL><LI>launch the analytic in one window
+<LI>launch the generator in another window
+<LI>kill the generator after the stream is complete and the analytic exits 
+</OL>
+<P>IMPORTANT NOTE: The order of these steps is important.  You must
+launch the analytic before launching the generator, else the analytic
+will miss initial packets.
+</P>
+<P>You can launch the C++ version of an analytic by typing the following
+(for the anomaly1 analytic):
+</P>
+<PRE>% cd analytics/anomaly1/c++
+% anomaly1 55555 
+</PRE>
+<P>You can launch the Python version by typing the following (for the
+anomaly1 analytic):
+</P>
+<PRE>% cd analytics/anomaly1/python
+% python anomaly1.py 55555 
+</PRE>
+<P>Instructions on how to launch other versions are given in the README
+in the sub-directory for those implementations.
+</P>
+<P>The powerlaw generator is the one to use with the anomaly1 analytic.
+It can be launched in another window as described above:
+</P>
+<PRE>% cd generators/powerlaw
+% powerlaw 127.0.0.1 
+</PRE>
+<P>As soon as you do this, the <A HREF = "#anomaly1">anomaly1</A> analytic should begin
+to find anomalies and print information to the screen.  This should
+continue until the generator has emitted all its packets, which is 1
+million (or 50 million datums) by default.  (You can change this with
+a "-n N" switch on the powerlaw command if you wish.)  This should
+take 15 to 30 seconds on a typical machine.
+</P>
+<P>When the generator is finished it will print a summary of its
+generation statistics to the screen.  The analytic should do likewise
+and should exit.  The generator will not exit, so you need to kill it
+with a CTRL-C.
+</P>
+<P>Note that not all of the analytics produce output as immediately as
+<A HREF = "#anomaly1">anomaly1</A>.  For example, there is a delay of a few seconds
+for <A HREF = "#anomaly3">anomaly3</A> to begin finding anomalies, due to its
+processing two levels of keys.
+</P>
+<P>If your run does not drop packets, any version (C++, Python, etc) of
+each of the analytics should produce results identical to those in the
+results directory of the FireHose tarball.  Those were run using a
+single generator for varying numbers of packets from 10,000 to 10
+million.  As discussed in the <A HREF = "generators.html">Generators</A> section,
+you can set the number of packets via a "-n N" switch for any of the
+generators.
+</P>
+<P>You can check if the analytic processed all the packets in the stream
+by comparing the "packets emitted" value printed by the generator to
+the "packets received" value printed by the analytic.  If your run
+drops packets, you will likely get different output when comparing to
+the files included in the results directory.  You can dial down the
+generation rate using a "-r N" swtich on any of the generators, which
+should eventually reduce the drop rate to 0.0.  See the
+<A HREF = "generators.html">Generators</A> section for details.
+</P>
+<P>You can increase the stream rate by running multiple generators.
+The easiest way to do this is by running one from each of multiple
+windows.  E.g. to run with two generators, launch the analytic
+as follows:
+</P>
+<PRE>% cd analytics/anomaly1/c++
+% anomaly1 -p 2 55555 
+</PRE>
+<P>And then launch the generators in each of two windows:
+</P>
+<PRE>% cd generators/powerlaw
+% powerlaw -p 2 -x 0 127.0.0.1 
+</PRE>
+<PRE>% cd generators/powerlaw
+% powerlaw -p 2 -x 1 127.0.0.1 
+</PRE>
+<P>The meaning of the -p and -x switches is discussed in the
+<A HREF = "generators.html">Generators</A> and <A HREF = "generators.html">Analytics</A> sections.
+</P>
+<P>If you launch both generators at (nearly) the same time, they will
+also finish at the same time, and the analytic will see a data stream
+arriving at (nearly) 2x the rate of a single generator.  Again the
+analytic should exit when both generators have finished, and you will
+then need to kill both the generators with CTRL-C.
+</P>
+<P>You will quickly find that launching and killing generators and
+analytics in different windows is tedious work.  See the sub-section
+below about the <A HREF = "#launch">launch.py</A> script in the tools directory,
+which automates this procedure.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "tuning"></A>Tuning your machine 
+</H4>
+<P>The default settings within the kernel of most Linux installations are
+not ideal for sending and receiving UDP packets at high streaming
+rates with minimal packet loss.  The default buffer sizes are too
+small to prevent loss of data when there are "hiccups" in the system
+due to OS operations, e.g. swapping and switching between processes.
+</P>
+<P>You can query the current settings for both send ("s") and receive
+("r") buffers by the following commands:
+</P>
+<P>% cat /proc/sys/net/core/rmem_max
+% cat /proc/sys/net/core/rmem_default
+% cat /proc/sys/net/core/smem_max
+% cat /proc/sys/net/core/smem_default
+</P>
+<P>If they are only a few 100 Kbytes, you should set them to values more
+like 16 Mbytes, via these commands:
+</P>
+<P>% sysctl -w net.core.rmem_max='16777216'
+% sysctl -w net.core.rmem_default='16777216'
+% sysctl -w net.core.smem_max='16777216'
+% sysctl -w net.core.smem_default='16777216'
+</P>
+<P>You will need sudo or root privileges to make these changes.  You
+should write down the original values if you wish to restore them
+after running FireHose benchmarks.
+</P>
+<P>These buffer sizes assume you have adequate memory on your box that
+reserving 32 Mbytes for UDP send and receive buffers is not a problem.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "bench1"></A>Benchmark #1 - anomaly detection in a fixed key range 
+</H4>
+<P>This benchmark uses the <A HREF = "generators.html#bias">biased-powerlaw
+generator</A> and the
+<A HREF = "analytic.html#anomaly1">anomaly1</A> analytic.
+</P>
+<P>While it is running, this analytic should print information about
+anomalies it finds to the screen, one line at a time, flagging the key
+value as either a "true anomaly", "false positive", or "false
+negative".  The meaning of these various flavors of anomalies is
+discussed on the <A HREF = "analytics.html#anomaly1">anomaly1 analytic</A> doc page.
+</P>
+<P>At the end of the run, the analytic prints a summary like this:
+</P>
+<PRE>packets received = 1000000
+datums received = 50000000
+unique keys = 85567
+max occurrence of any key = 16713641
+true anomalies = 34
+false positives = 9
+false negatives = 0
+true negatives = 9645 
+</PRE>
+<P>If no packets were dropped, these are exactly the results you should
+see if a single copy of the generator produces 1 million packets (the
+default), i.e. 50M datums.  See other files in the results directory
+for output from runs with fewer or more generated packets.
+</P>
+<P>The number of unique keys (85K in this case) is out of the 100,000
+keys the <A HREF = "generators.html#bias">powerlaw generator</A> samples from.  See
+its doc page for details.
+</P>
+<P>To produce an entry for the <A HREF = "results.html">Results</A> section, this
+benchmark needs to be run for 5 minutes, ideally with no dropped
+packets.  The generation rate and number of packets necessary to do
+this will depend on which implementation of the analytic you use, and
+what machine you run it on.  See the discussion below about the
+<A HREF = "#launch">launch.py</A> script which can help automate such a run.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "bench2"></A>Benchmark #2 - anomaly detection in an unbounded key range 
+</H4>
+<P>This benchmark uses the <A HREF = "generators.html#active">active set generator</A>
+and the <A HREF = "analytic.html#anomaly2">anomaly2</A> analytic.
+</P>
+<P>While it is running, this analytic should print information about
+anomalies it finds to the screen, one line at a time, flagging the key
+value as either a "true anomaly", "false positive", or "false
+negative".  The meaning of these various flavors of anomalies is the
+same as for the anomaly1 benchmark, and is discussed on the <A HREF = "analytics.html#anomaly2">anomaly2
+analytic</A> doc page.
+</P>
+<P>At the end of the run, the analytic prints a summary like this:
+</P>
+<PRE>packets received = 1000000
+datums received = 50000000
+unique keys = 34885815
+true anomalies = 395
+false positives = 87
+false negatives = 6
+true negatives = 102338 
+</PRE>
+<P>If no packets were dropped, these are exactly the results you should
+see if a single copy of the generator produces 1 million packets (the
+default), i.e. 50M datums.  See other files in the results directory
+for output from runs with fewer or more generated packets.
+</P>
+<P>Note that the number of unique keys, as well as the number of
+anomalies found is much higher than for the anomaly1 benchmark.  This
+is because the <A HREF = "generators.html#active">active set generator</A> samples
+from an unbounded range of keys.  See its doc page for details.
+</P>
+<P>To produce an entry for the <A HREF = "results.html">Results</A> section, this
+benchmark needs to be run for 30 minutes, ideally with no dropped
+packets.  This is so that the expiration strategy for the hash table
+of the analytic is stress-tested.  The generation rate and number of
+packets necessary to do this will depend on which implementation of
+the analytic you use, and what machine you run it on.  See the
+discussion below about the <A HREF = "#launch">launch.py</A> script which can help
+automate such a run.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "bench3"></A>Benchmark #3 - anomaly detection in an two-level key space 
+</H4>
+<P>This benchmark uses the <A HREF = "generators.html#twolevel">two-level generator</A>
+and the <A HREF = "analytic.html#anomaly3">anomaly3</A> analytic.
+</P>
+<P>While it is running, this analytic should print information about
+anomalies it finds to the screen, one line at a time, flagging the key
+value as either a "true anomaly", "false positive", or "false
+negative".  The meaning of these various flavors of anomalies is the
+same as for the anomaly1 benchmark except that they apply not to keys
+in the data stream, but to "inner" keys derived from their values, as
+discussed on the <A HREF = "analytics.html#anomaly3">anomaly3 analytic</A> doc page.
+</P>
+<P>At the end of the run, the analytic prints a summary like this:
+</P>
+<PRE>packets received = 1000000
+datums received = 40000000
+unique outer keys = 24005720
+unique inner keys = 475860
+true anomalies = 15
+false positives = 2
+false negatives = 0
+true negatives = 5204 
+</PRE>
+<P>If no packets were dropped, these are exactly the results you should
+see if a single copy of the generator produces 1 million packets (the
+default), i.e. 40M datums.  See other files in the results directory
+for output from runs with fewer or more generated packets.
+</P>
+<P>Note that statistics are given for both "outer" keys (in the data
+stream) and "inner" keys (derived from the values of outer keys).  As
+with the anomaly2 benchmark, both of these kinds of keys are sampled
+from unbounded ranges.
+</P>
+<P>To produce an entry for the <A HREF = "results.html">Results</A> section, this
+benchmark needs to be run for 30 minutes, ideally with no dropped
+packets.  This is so that the expiration strategy for the hash tables
+of the analytic are stress-tested.  The generation rate and number of
+packets necessary to do this will depend on which implementation of
+the analytic you use, and what machine you run it on.  See the
+discussion below about the <A HREF = "#launch">launch.py</A> script which can help
+automate such a run.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "launch"></A>Using the launch.py script to run benchmarks 
+</H4>
+<P>The tools directory of the FireHose distribution has Python and shell
+scripts which are useful when running benchmarks or when running the
+generators and analytics on their own.
+</P>
+<P>The launch.py script can be used for the following tasks:
+</P>
+<UL><LI>Run a benchmark, with one or more generators and an analytic together,
+for a specified time or at a desired rate. 
+
+<LI>Run a benchmark interatively at slower rates until the drop rate is
+acceptable, then perform a benchmark run. 
+
+<LI>Run one or more instances of a generator with various command-line
+options. 
+
+<LI>Run an analytic with various command-line options, including analytics
+like PHISH versions that require specialized launch commands or
+post-processing of results to format them for scoring. 
+
+<LI>Perform a benchmark run (possibly with dropped packets), then perform
+a second benchmark run (at a slower rate, or with the C++ reference
+implementaion) with no drops. 
+
+<LI>Compute a "score" between two runs: one with dropped packets and one
+without. 
+</UL>
+<P>The most convenient attribute of launch.py is that it manages all the
+"processes" that are part of a benchmark run, namely one or more
+generator proceses and an analytic process.  It launches them in the
+correct sequence, monitors and collects their output, and cleans up
+after they have finished, killing them as needed.  A summary of the
+run is printed to the screen and a log file for later review.
+</P>
+<P>As a simple example, the following command could be used to run the
+C++ version of the first benchmark at a stream rate of 5.6M datums per
+second (which requires 2 generators) for 5 minutes, to generate the
+results needed for an entry in the table of the <A HREF = "results.html">Results</A>
+section.
+</P>
+<PRE>python launch.py bench -bname 1 -gnum 2 -grate 5600000 -gtime 5 -adir c++ -id bench1.c++ 
+</PRE>
+<P>The output from the various processes are written to these files:
+</P>
+<UL><LI>generator.bench1.c++.0 = output from 1st generator
+<LI>generator.bench1.c++.1 = output from 2nd generator
+<LI>analytic.bench1.c++ = output from analytic (list of found anomalies)
+<LI>log.bench1.c++ = summary of run, including drop rate 
+</UL>
+<P>A single launch.py command can also be used to perform a benchmark run
+followed by a 2nd no-drop run and "score" the results of the 1st
+against the 2nd, to compare the accuracy.  The scoring metrics are
+explained in the <A HREF = "results.html">Results</A> section.
+</P>
+<P>Examples of using the launch.py script to perform multiple, successive
+benchmark runs for various tasks, are illustrated in the bench.py
+script, also included in the tools directory.  For example, if you
+know Python, it is easy to write a loop in bench.py to loop over a
+series of short runs, each invoked with launch.py, that generate
+datums at different stream rates, to quickly estimate a maximum stream
+rate that can be processed without dropped packets.
+</P>
+<P>The full documentation for launch.py and its options is listed at the
+top of the launch.py file, and included here.  In brief, there is one
+required argument which is the "action" to perform, which is one of
+the following:
+</P>
+<PRE># gen = run the generator only
+# analytic = run the analytic only
+# bench = run a benchmark with generator and analytic together
+# score = score a pair of already created output files
+# bench/score = perform 2 benchmark runs and score them
+#   1st run with specified settings
+#   2nd run with -adrop 0.0 
+</PRE>
+<P>Then there are optional switches for the generator (all of which have
+defaults):
+</P>
+<PRE># -gname powerlaw/active/... = which generator to run (def = powerlaw)
+# -gcount N = total # of packets for all generators to emit (def = 1000000)
+# -grate max/N = aggregate rate (datums/sec) for all generators (def = max)
+# -gnum N = # of generators to run (def = 1)
+# -gtime N = minutes to run all generators (def = 0)
+#   if non-zero, overrides -gcount
+#   iterates over short test runs to reset -gcount
+# -gtimelimit N = time limit in short iterative -gtime runs (def = 10.0)
+# -gswitch N string = command-line switches for Nth generator launch
+#     (def = "" for all N)
+#   N = 1 to gnum
+#   enclose string in quotes if needed so is a single arg
+#   note: these switches are added to ones controlled by other options
+#   note: -r, -p, -x are controlled by other options
+#   note: can be specified multiple times for different N
+# -gargs N string = arguments for Nth generator launch (def = "" for all N)
+#   N = 1 to gnum
+#   enclose string in quotes if needed so is a single arg
+#   note: default of "" means 127.0.0.1 (localhost) will be used
+#   note: can be specified multiple times for different N 
+</PRE>
+<P>and likewise for the analytic:
+</P>
+<PRE># -aname anomaly1/anomaly2/... = which analytic to run (def = anomaly1)
+# -adir c++/python/phish/... = which flavor of analytic to run (def = c++)
+# -adrop any/N = target drop rate percentage for analytic (def = any)
+#   if not any, overrides -grate setting
+#   iterates over short test runs to reset -grate
+# -adropcount N = use for -gcount in short iterative -adrop runs (def = 1000000)
+# -afrac fraction = drop -grate computed by -adrop by this fraction
+#                   to insure no drops, only used if -adrop 0.0 (def = 1.0)
+# -acmd string = string for launching analytic (def = "")
+#   enclose string in quotes if needed so is a single arg
+#   not needed for -adir c++/python
+#     unless you need to change command line settings
+#   required for other -adir settings
+#     e.g. this script doesn't know how to launch a PHISH job
+#   note: script will cd to -adir setting before cmd is invoked
+# -apost string = command to invoke to post-process analytic output into
+#                 expected format, e.g. to merge multiple output files,
+#                 launch.py treats stdout of invoked string as file content
+#                 note: will invoke command from within -adir directory 
+</PRE>
+<P>Finally, there are a few generic optional switches that can be
+specified:
+</P>
+<PRE># -id string = string to append to all output file names (def = "launch")
+# -bname N = which benchmark to run (def = 0)
+#   if non-zero, overrides -gname and -aname
+# -table no/yes = if scoring, also output table format (def = no)
+# -fdir path = FireHose directory (def = ~/firehose) 
+</PRE>
+<P>If you don't want to use the "launch.py" tool, the simpler "launch.sh"
+script can be edited to launch multiple versions of a generator
+(nearly) simultaneously.  It is written for use with the "tcsh" shell,
+but similar scripts could be created for "bash" or other shells.
+E.g. you can run it by typing
+</P>
+<PRE>% tcsh launch.sh 
+</PRE>
+<P>Note that the script launches the generators in the background.  You
+should see output from all instances of the generator in the window
+you run the script from.  After they complete, you MUST be sure to
+explicitly kill each of the generator processes, else they may
+continue to run, unnoticed in the background.  See the next section
+for further discussion.
+</P>
+<HR>
+
+<HR>
+
+<H4><A NAME = "kill"></A>Killing instances of running generators 
+</H4>
+<P>IMPORTANT NOTE: Because a generator process does not terminate until
+explictly killed, it is possible for one or more instances of running
+generator to persist after a benchmark run completes.  Because a
+running generator continues to send its STOP packets in an infinite
+loop, it will continue to consume system resources and may confuse an
+analytic the next time the analytic is launched (e.g. it immediately
+terminates without processing new packets).
+</P>
+<P>An unkilled generator can results from several scenarios:
+</P>
+<UL><LI>a benchmark run crashes
+<LI>you kill the benchmark run before it ends
+<LI>the launch.sh script is used to launch generator(s) in the background
+<LI>the launch.py or bench.py scripts encounter some error condition 
+</UL>
+<P>The best way to insure no generators are currently running
+are to type commands like this:
+</P>
+<P>% ps -ef | grep powerlaw
+% ps -ef | grep active
+% ps -ef | grep twolevel
+</P>
+<P>to identify their process IDs.
+</P>
+<P>Then a kill command such as this:
+</P>
+<PRE>% kill 93985 
+</PRE>
+<P>can be invoked on the ID to explicitly kill a running generator.
+</P>
+<script src="https://share.sandia.gov/_assets/js/snl-lite-clf.min.js"></script>
+
+</BODY>
+
+</HTML>
